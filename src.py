@@ -13,15 +13,17 @@ def main(argv):
 
   # loops over all tsp files in the argument
   for f in argv[1:]:
-      if f.endswith('.tsp'):
-        cordinates = open(f,'r')
-        print("Success parsing " + f)
-        print('**********************************************************')
-        print(cordinates.read())
-        cordinates.close()
-        print('**********************************************************')
-        
-      else print("This script only works with extension .tsp")
+    if f.endswith('.tsp'):
+      cordinates = open(f,'r')
+      print("Success parsing " + f)
+      print('**********************************************************')
+      print(cordinates.read())
+      cordinates.close()
+      print('**********************************************************')
+
+    else:
+      print("This script only works with a file extension of .tsp")
+      sys.exit(1)
             
 if __name__ == '__main__':
     main(sys.argv)
