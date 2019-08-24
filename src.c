@@ -3,12 +3,13 @@
 #include <unistd.h>
 #include<string.h>
 
-void createCityArray(FILE *fptr);
+int createCityArray(FILE *fptr);
 void printFileContent(FILE *fptr);
 
 int main() {
   FILE *fptr;
   char filePath[25];
+  int *cityArr;
 
   printf("Please provide a file: \n");
   scanf("%s", filePath);
@@ -17,7 +18,7 @@ int main() {
 
   if (fptr != NULL) {
     //printFileContent(fptr);
-    createCityArray(fptr);
+    cityArr = createCityArray(fptr);
 
 
 
@@ -27,6 +28,7 @@ int main() {
   }
 
   fclose(fptr);
+  free(cityArr);
 
   return 0;
 }
@@ -43,13 +45,14 @@ void printFileContent(FILE * fptr) {
   }
 }
 
-void createCityArray(FILE *fptr) {
-  int *cityArr;
+int createCityArray(FILE *fptr) {
+  double *cityArr = 0;
   char *nextLine;
   char stringLine[1000];
   char str1[100];
   int citySize = 0;
   int lineNumb = 1;
+  int cityNumb = 0;
   double xCord = 0;
   double yCord = 0;
   FILE *tmpFptr;
@@ -68,20 +71,29 @@ void createCityArray(FILE *fptr) {
       rewind(tmpFptr);
       fscanf(tmpFptr, "%s %d", str1, &citySize);
 
-      cityArr = (int *)malloc(citySize * sizeof(int));
+      cityArr = (double *)malloc((2 * citySize) * sizeof(double));
     }
 
-    // if (lineNumb >= 8) {
-      // tmpFptr = fopen ("temp.txt", "w+");
-      // fputs(stringLine, tmpFptr);
+    if (lineNumb >= 8) {
+
+      tmpFptr = fopen ("temp.txt", "w+");
+      fputs(stringLine, tmpFptr);
 
       rewind(tmpFptr);
       fscanf(tmpFptr, "%*d %lf %lf", &xCord, &yCord);
-    // }  
 
-    // printf ("%s", c); 
+      cityArr[cityNumb] = xCord;
+      cityNumb++;
+      cityArr[cityNumb] = yCord;
+      cityNumb++;
+    }  
     nextLine = fgets(stringLine, sizeof(stringLine), fptr);
     lineNumb++;
-    printf("Here is the demension: %d, %lf, %lf \n", citySize, xCord, yCord);
   }
+
+  for(int i = 0; i < citySize * 2; i++) {
+    printf("These are the values in the array: %lf \n", cityArr[i]);
+  }
+
+  return *cityArr;
 }
