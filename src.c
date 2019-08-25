@@ -2,11 +2,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <math.h>
 
 double * createCityArray(FILE *);
-double createDistMatrix(int *);
+double ** createDistMatrix(double *);
+double calcDistance(int, int, double *);
 void printFileContent(FILE *);
 void printArrayContent(double *);
+void printMatrixContent(double **);
+int calcCombinations();
+int calcFactorial(int n);
 
 int citySize = 0;
 
@@ -14,6 +19,7 @@ int main() {
   FILE *fptr;
   char filePath[25];
   double *cityArr;
+  double **distanceArr;
 
   printf("Please provide a file: \n");
   scanf("%s", filePath);
@@ -23,7 +29,9 @@ int main() {
   if (fptr != NULL) {
     //printFileContent(fptr);
     cityArr = createCityArray(fptr);
-    printArrayContent(cityArr);
+    //printArrayContent(cityArr);
+    distanceArr = createDistMatrix(cityArr);
+    printMatrixContent(distanceArr);
 
   } else { 
     perror("Error while opening the file.\n");
@@ -82,8 +90,52 @@ double * createCityArray(FILE *fptr) {
   return cityArr;
 }
 
-double createDistMatrix(int *cityArr) {
-  return 0.0;
+int calcCombinations() {
+  int numerator = calcFactorial(citySize);
+  int denominator = (calcFactorial(citySize) * calcFactorial(citySize - 2));
+  double answer = numerator / denominator;
+
+  return answer;
+}
+
+int calcFactorial(int n) {
+  int answer = 1;
+  for (int i = 2; i <= n; i++) answer *= i;
+  return answer;
+}
+
+double ** createDistMatrix(double *cityArr) {
+  int rows = citySize;
+  int columns = citySize;
+
+  double **distMatrix = (double **)malloc(rows * sizeof(double *)); 
+  for (int i = 0; i < rows; i++) 
+    distMatrix[i] = (double *)malloc(columns * sizeof(double)); 
+
+  // Note that distMatrix[i][j] is same as *(*(distMatrix+i)+j)  
+  for (int i = 0; i <  rows; i++) 
+    for (int j = 0; j < columns; j++) 
+      distMatrix[i][j] = calcDistance(i,j, cityArr);
+
+  return distMatrix;
+}
+
+double calcDistance(int cityOne, int cityTwo, double *cityArr) {
+  double dist = 0;
+  double deltaX = 0;
+  double deltaY = 0;
+
+  if (cityOne == cityTwo) {
+    return 0.0;
+  }
+
+  deltaX = cityArr[cityOne * 2] - cityArr[cityTwo * 2];
+  deltaX *= deltaX;
+
+  deltaY = cityArr[2 * cityOne + 1] - cityArr[2 * cityTwo + 1];
+  deltaY *= deltaY;
+
+  return sqrt(deltaX + deltaY);
 }
 
 void printFileContent(FILE *fptr) {
@@ -114,4 +166,13 @@ void printArrayContent(double *cityArr) {
       printf("City %d: X = %lf Y = %lf \n", j, cityArr[i-1], cityArr[i]);
     }
   }
+}
+
+void printMatrixContent(double **distMatrix) {
+  int rows = citySize;
+  int columns = citySize;
+
+  for (int i = 0; i < rows; i++) 
+    for (int j = 0; j < columns; j++) 
+        printf("From City %d to City %d: %lf \n", i, j, distMatrix[i][j]); 
 }
