@@ -1,25 +1,42 @@
+/*
+Raudel Valdes
+University of Louisville
+CECS-525: Artificial Intelligence
+Project #1
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+//Dont forget to free all of your mallocs!!!!
 
 double * createCityArray(FILE *);
+int calcCombinations();
+int calcFactorial(int n);
+struct path *  calcMatrixPerm(double **, struct path *, int);
 double ** createDistMatrix(double *);
 double calcDistance(int, int, double *);
 void printFileContent(FILE *);
 void printArrayContent(double *);
 void printMatrixContent(double **);
-int calcCombinations();
-int calcFactorial(int n);
 
 int citySize = 0;
+
+struct path {
+  char path;
+  double distance;
+  int pathNumb;
+} path;
 
 int main() {
   FILE *fptr;
   char filePath[25];
   double *cityArr;
-  double **distanceArr;
+  double **distMatrix;
+  struct path *salesmanPath = (struct path *)malloc(calcFactorial(citySize) * sizeof(salesmanPath));
 
   printf("Please provide a file: \n");
   scanf("%s", filePath);
@@ -30,8 +47,9 @@ int main() {
     //printFileContent(fptr);
     cityArr = createCityArray(fptr);
     //printArrayContent(cityArr);
-    distanceArr = createDistMatrix(cityArr);
-    printMatrixContent(distanceArr);
+    distMatrix = createDistMatrix(cityArr);
+    //printMatrixContent(distMatrix);
+    calcMatrixPerm(distMatrix, salesmanPath, 0);
 
   } else { 
     perror("Error while opening the file.\n");
@@ -40,6 +58,7 @@ int main() {
 
   fclose(fptr);
   free(cityArr);
+  free(salesmanPath);
 
   return 0;
 }
@@ -102,6 +121,40 @@ int calcFactorial(int n) {
   int answer = 1;
   for (int i = 2; i <= n; i++) answer *= i;
   return answer;
+}
+
+struct path * calcMatrixPerm(double ** distMatrix, struct path *salesmanPath, int pathNumb) {
+  int r = 0; //matrix row
+  int c = 1; //matrix column
+  double distTraveled = 0;
+  char *pathTaken = (char *)malloc(citySize * sizeof(char));
+
+  if (pathNumb == calcFactorial(citySize)) 
+    return salesmanPath;
+
+  for (r; r < citySize; r++) {
+    printf("outer loop \n");
+    for (c; c < citySize; c++) {
+      printf(" inner loop \n");
+
+      distTraveled = distMatrix[r][c];
+
+      if (c == citySize - 1) {
+        c = 0;
+        distTraveled = distMatrix[r][c];
+      }
+
+      salesmanPath[pathNumb].distance = distTraveled;
+      salesmanPath[pathNumb].pathNumb = pathNumb;
+      salesmanPath[pathNumb].path = *pathTaken;
+
+      free(pathTaken);
+
+      break;
+    }
+  }
+
+  calcMatrixPerm(distMatrix, salesmanPath, pathNumb++);
 }
 
 double ** createDistMatrix(double *cityArr) {
