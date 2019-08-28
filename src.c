@@ -58,9 +58,12 @@ int main() {
 
   
     cityList = (int *)malloc(citySize * sizeof(int));
-    salesmanInfo = (struct path *)malloc(calcFactorial(citySize) * sizeof(salesmanInfo));
+    salesmanInfo = (struct path *)malloc(calcFactorial(citySize) * sizeof(struct path));
 
-    for (int i = 0; i < citySize; i++)
+    for (int i = 0; i <= calcFactorial(citySize); i++)
+      salesmanInfo[i].path = (int *)malloc((citySize + 1) * sizeof(int));
+
+    for (int i = 0; i <= citySize; i++)
       cityList[i] = i;
 
     permuteCities(cityList, salesmanInfo, 0);
@@ -150,14 +153,19 @@ void permuteCities(int *cityList, struct path * salesmanInfo, int c) {
   int r = citySize - 1;
 
   if (c == r) {
-    salesmanInfo[permNumb].path = cityList;
-    printf("************** START %d ******************* \n", permNumb);
-    printf("this is the path: ");
-    for (int j = 0; j <= r; j++) {
-      printf("%d -> ", salesmanInfo[permNumb].path[j]);
+    salesmanInfo[permNumb].pathNumb = permNumb;
+
+    for (int j = 0; j < citySize; j++)
+      salesmanInfo[permNumb].path[j] = cityList[j];
+
+    salesmanInfo[permNumb].path[citySize] = salesmanInfo[permNumb].path[0];
+
+    if (permNumb > 0) {
+      for(int j =0; j < citySize; j++) {
+      printf("%d -> ", salesmanInfo[permNumb].path[j]); 
+      }
     }
-    printf("%d", salesmanInfo[permNumb].path[0]);
-    printf("\n ************** END %d ******************* \n", permNumb);
+    printf("\n");
     permNumb++;
   }
   else
@@ -269,8 +277,9 @@ void printPathStruct(struct path *salesmanInfo) {
     for (int j = 0; j < citySize; j++) {
       printf("%d -> ", salesmanInfo[i].path[j]);
     }
-    printf("%d", salesmanInfo[8].path[3]);
-    printf("\n ************** END %d ******************* \n", i);
+    printf("%d \n", salesmanInfo[i].path[citySize]);
+    printf("path #: %d \n", salesmanInfo[i].pathNumb);
+    printf(" ************** END %d ******************* \n", i);
   }
 }
 
