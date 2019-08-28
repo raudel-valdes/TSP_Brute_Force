@@ -18,7 +18,7 @@ int calcCombinations();
 int calcFactorial(int n);
 struct path * calcPathDist(struct path *);
 void swapCities(int *, int *);
-struct path * permuteCities(int *, struct path *, int, int);
+void permuteCities(int *, struct path *, int);
 double ** createDistMatrix(double *);
 double calcDistance(int, int, double *);
 void printFileContent(FILE *);
@@ -28,6 +28,7 @@ void printPathStruct(struct path *);
 
 
 int citySize = 0;
+int permNumb = 0;
 
 struct path {
   int *path;
@@ -40,20 +41,13 @@ int main() {
   //char filePath[25];
   double *cityArr;
   double **distMatrix;
-  struct path *funcSalesmanInfo;
-  struct path *mainSalesmanInfo;
-  char *pathTaken = (char *)malloc((citySize + 1) * sizeof(char));
-  int *cityList= (int *)malloc(citySize * sizeof(int));
-  funcSalesmanInfo = (struct path *)malloc(calcFactorial(citySize) * sizeof(funcSalesmanInfo));
-  mainSalesmanInfo = (struct path *)malloc(calcFactorial(citySize) * sizeof(funcSalesmanInfo));
-
-  for (int i = 0; i < citySize; i++)
-    cityList[i] = i;
+  struct path *salesmanInfo;
+  int *cityList;
 
   // printf("Please provide a file: \n");
   //scanf("%s", filePath);
 
-  fptr = fopen("Random12.tsp", "r");
+  fptr = fopen("Random4.tsp", "r");
 
   if (fptr != NULL) {
     //printFileContent(fptr);
@@ -61,9 +55,16 @@ int main() {
     //printArrayContent(cityArr);
     distMatrix = createDistMatrix(cityArr);
     //printMatrixContent(distMatrix);
-    mainSalesmanInfo = permuteCities(cityList, funcSalesmanInfo, 1, 0);
-    printPathStruct(mainSalesmanInfo);
-    //calcPathDist(mainSalesmanInfo);
+
+  
+    cityList = (int *)malloc(citySize * sizeof(int));
+    salesmanInfo = (struct path *)malloc(calcFactorial(citySize) * sizeof(salesmanInfo));
+
+    for (int i = 0; i < citySize; i++)
+      cityList[i] = i;
+
+    permuteCities(cityList, salesmanInfo, 0);
+    printPathStruct(salesmanInfo);
 
   } else { 
     perror("Error while opening the file.\n");
@@ -71,11 +72,7 @@ int main() {
   }
 
   fclose(fptr);
-  free(cityArr);
-  free(distMatrix);
-  free(pathTaken);
-  free(mainSalesmanInfo);
-  free(funcSalesmanInfo);
+  free(salesmanInfo);
   free(cityList);
 
   return 0;
@@ -141,41 +138,42 @@ int calcFactorial(int n) {
   return answer;
 }
 
-///////////////////////////////////////////////////////////////
 void swapCities(int *x, int *y) { 
   int temp; 
   temp = *x; 
   *x = *y; 
-  *y = temp; 
+  *y = temp;
 } 
 
-struct path * permuteCities(int *cityList, struct path * salesmanInfo, int pathNumb, int c) { 
+void permuteCities(int *cityList, struct path * salesmanInfo, int c) { 
   int i = 0;
-  int r = citySize -1;
+  int r = citySize - 1;
 
   if (c == r) {
-    //printf("%s\n", a); 
+    salesmanInfo[permNumb].path = cityList;
+    printf("************** START %d ******************* \n", permNumb);
+    printf("this is the path: ");
     for (int j = 0; j <= r; j++) {
-      // salesmanInfo[pathNumb].path[j] = cityList[j];
-      printf("this is the city list and pathNumb: %d, %d \n", cityList[j], pathNumb);
+      printf("%d -> ", salesmanInfo[permNumb].path[j]);
     }
-    printf(" iam outside!");
+    printf("%d", salesmanInfo[permNumb].path[0]);
+    printf("\n ************** END %d ******************* \n", permNumb);
+    permNumb++;
   }
   else
   { 
-    for (i = c; i <= r; i++) { 
+    for (i = c; i <= r; i++) {     
       swapCities((cityList + c), (cityList + i)); 
-      permuteCities(cityList, salesmanInfo, pathNumb, c + 1);
-      swapCities((cityList + c),(cityList+i));
+      permuteCities(cityList, salesmanInfo,c + 1);
+      swapCities((cityList + c),(cityList+i)); 
     } 
   } 
 
-  return salesmanInfo;
+  return;
 }
 
-///////////////////////////////////////////////////////////////
 
-struct path * calcPathDist(struct path *salesmanInfo) {
+struct path  *calcPathDist(struct path *salesmanInfo) {
   int r = 0; //matrix row
   int c = 0; //matrix column
   int *cityList;
@@ -241,8 +239,6 @@ void printArrayContent(double *cityArr) {
   int cityArrSize = citySize * 2;
   int j = 1;
 
-  // printf("These are the city cordinates in the array: \n");
-
   for(int i = 0; i < cityArrSize; i++) {
     if (i % 2 == 0 && i != 0) {
       printf("City %d: X = %lf Y = %lf \n", j, cityArr[i-2], cityArr[i-1]);
@@ -264,12 +260,17 @@ void printMatrixContent(double **distMatrix) {
         printf("From City %d to City %d: %lf \n", i, j, distMatrix[i][j]); 
 }
 
-void printPathStruct(struct path * salesmanInfo) {
-  int numbPaths = calcFactorial(citySize) + 1;
+void printPathStruct(struct path *salesmanInfo) {
+  int numbPaths = calcFactorial(citySize);
 
-  for (int i = 0; i <= numbPaths; i++) {
-    printf("Path #: %d \n", salesmanInfo[i].pathNumb);
-    // printf("Path of Cities: %d \n", *salesmanInfo[i].path);
-    printf("Path total Distance: %lf \n", salesmanInfo[i].totalDist);
+  for (int i = 0; i < numbPaths; i++) {
+    printf("************** START %d ******************* \n", i);
+    printf("City Path: ");
+    for (int j = 0; j < citySize; j++) {
+      printf("%d -> ", salesmanInfo[i].path[j]);
+    }
+    printf("%d", salesmanInfo[8].path[3]);
+    printf("\n ************** END %d ******************* \n", i);
   }
 }
+
