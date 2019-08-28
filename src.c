@@ -16,15 +16,16 @@ Project #1
 double * createCityArray(FILE *);
 int calcCombinations();
 int calcFactorial(int n);
-struct path * calcPathDist(struct path *);
+struct path * calcPathDist(struct path *, double **, int);
 void swapCities(int *, int *);
-void permuteCities(int *, struct path *, int);
+void permuteCities(int *, struct path *, double **, int);
 double ** createDistMatrix(double *);
 double calcDistance(int, int, double *);
 void printFileContent(FILE *);
 void printArrayContent(double *);
 void printMatrixContent(double **);
 void printPathStruct(struct path *);
+void findOptimalPath(struct path *);
 
 
 int citySize = 0;
@@ -38,16 +39,16 @@ struct path {
 
 int main() {
   FILE *fptr;
-  //char filePath[25];
+  char filePath[25];
   double *cityArr;
   double **distMatrix;
   struct path *salesmanInfo;
   int *cityList;
 
-  // printf("Please provide a file: \n");
-  //scanf("%s", filePath);
+  printf("Please provide a file: \n");
+  scanf("%s", filePath);
 
-  fptr = fopen("Random4.tsp", "r");
+  fptr = fopen(filePath, "r");
 
   if (fptr != NULL) {
     //printFileContent(fptr);
@@ -66,8 +67,9 @@ int main() {
     for (int i = 0; i <= citySize; i++)
       cityList[i] = i;
 
-    permuteCities(cityList, salesmanInfo, 0);
-    printPathStruct(salesmanInfo);
+    permuteCities(cityList, salesmanInfo, distMatrix, 0);
+    //printPathStruct(salesmanInfo);
+    findOptimalPath(salesmanInfo);
 
   } else { 
     perror("Error while opening the file.\n");
@@ -148,31 +150,27 @@ void swapCities(int *x, int *y) {
   *y = temp;
 } 
 
-void permuteCities(int *cityList, struct path * salesmanInfo, int c) { 
+void permuteCities(int *cityList, struct path * salesmanInfo, double ** distMatrix,int c) { 
   int i = 0;
   int r = citySize - 1;
 
   if (c == r) {
-    salesmanInfo[permNumb].pathNumb = permNumb;
 
     for (int j = 0; j < citySize; j++)
       salesmanInfo[permNumb].path[j] = cityList[j];
 
+    salesmanInfo[permNumb].pathNumb = permNumb;
     salesmanInfo[permNumb].path[citySize] = salesmanInfo[permNumb].path[0];
 
-    if (permNumb > 0) {
-      for(int j =0; j < citySize; j++) {
-      printf("%d -> ", salesmanInfo[permNumb].path[j]); 
-      }
-    }
-    printf("\n");
+    calcPathDist(salesmanInfo, distMatrix,permNumb);
+
     permNumb++;
   }
   else
   { 
     for (i = c; i <= r; i++) {     
       swapCities((cityList + c), (cityList + i)); 
-      permuteCities(cityList, salesmanInfo,c + 1);
+      permuteCities(cityList, salesmanInfo, distMatrix, c + 1);
       swapCities((cityList + c),(cityList+i)); 
     } 
   } 
@@ -180,7 +178,23 @@ void permuteCities(int *cityList, struct path * salesmanInfo, int c) {
   return;
 }
 
-struct path  *calcPathDist(struct path *salesmanInfo) {
+//for some reason I cant get rid of this function or change it
+//to return to void because then I get a lot of errors.
+//maybe it is because it is the only function that returns
+//salesmanInfo
+struct path  *calcPathDist(struct path *salesmanInfo, double **distMatrix, int permNumb) {
+  double distTrav = 0.0;
+  int r = 0;
+  int c = 0;
+
+  for (int i = 0; i < citySize; i++) {
+    r = salesmanInfo[permNumb].path[i];
+    c = salesmanInfo[permNumb].path[i+1];
+
+    distTrav += distMatrix[r][c];
+  }
+
+  salesmanInfo[permNumb].totalDist = distTrav;
 
   return salesmanInfo;
 }
@@ -216,6 +230,35 @@ double calcDistance(int cityOne, int cityTwo, double *cityArr) {
   deltaY *= deltaY;
 
   return sqrt(deltaX + deltaY);
+}
+
+void findOptimalPath(struct path * salesmanInfo) {
+  double optimalDist = 0.0;
+  int *optimalPath = (int *)malloc(calcFactorial(citySize) * sizeof(int));
+
+  //this has to be les than (<) look more into it.
+  //I have a feeling it has to be (<=)
+  for (int i = 0; i < calcFactorial(citySize); i++) {
+    if (i ==0 )
+      optimalDist = salesmanInfo[i].totalDist;
+
+    if (optimalDist > salesmanInfo[i].totalDist) {
+      optimalDist = salesmanInfo[i].totalDist;
+    }
+  }
+
+  // for(int i = 0; i < calcFactorial(citySize); i++ ) {
+  //   if (optimalDist == salesmanInfo[i].totalDist) {
+  //     for (int j = 0; j <= citySize; j++) {
+  //       optimalPath[j] = salesmanInfo[i].path[j];
+  //     }
+  //     optimalPath[]
+  //     //maybe create a struct for all of this
+  //   }
+  // }
+
+  printf("Optimal Path: \n");
+  printf("Total Dist: %lf \n", optimalDist);
 }
 
 void printFileContent(FILE *fptr) {
@@ -260,13 +303,15 @@ void printPathStruct(struct path *salesmanInfo) {
 
   for (int i = 0; i < numbPaths; i++) {
     printf("************** START %d ******************* \n", i);
+    printf("path #: %d \n", salesmanInfo[i].pathNumb);
     printf("City Path: ");
     for (int j = 0; j < citySize; j++) {
       printf("%d -> ", salesmanInfo[i].path[j]);
     }
     printf("%d \n", salesmanInfo[i].path[citySize]);
-    printf("path #: %d \n", salesmanInfo[i].pathNumb);
+    printf("Dist Traveled: %lf \n", salesmanInfo[i].totalDist);
     printf(" ************** END %d ******************* \n", i);
   }
 }
+
 
