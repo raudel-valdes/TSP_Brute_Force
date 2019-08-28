@@ -180,20 +180,8 @@ void permuteCities(int *cityList, struct path * salesmanInfo, int c) {
   return;
 }
 
-
 struct path  *calcPathDist(struct path *salesmanInfo) {
-  int r = 0; //matrix row
-  int c = 0; //matrix column
-  int *cityList;
-  double distTraveled = 0;
 
-
-  //salesmanInfo[pathNumb].distance = distTraveled;
-  // salesmanInfo[pathNumb].pathNumb = pathNumb;
-  // salesmanInfo[pathNumb].path = pathTaken;
-
-  //in case the basecase does not get triggered
-  //Although it might stay in an infinite loop then?
   return salesmanInfo;
 }
 
@@ -214,7 +202,6 @@ double ** createDistMatrix(double *cityArr) {
 }
 
 double calcDistance(int cityOne, int cityTwo, double *cityArr) {
-  double dist = 0;
   double deltaX = 0;
   double deltaY = 0;
 
