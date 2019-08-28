@@ -37,6 +37,7 @@ struct path {
   int pathNumb;
 } path;
 
+
 int main() {
   FILE *fptr;
   char filePath[25];
@@ -234,7 +235,11 @@ double calcDistance(int cityOne, int cityTwo, double *cityArr) {
 
 void findOptimalPath(struct path * salesmanInfo) {
   double optimalDist = 0.0;
-  int *optimalPath = (int *)malloc(calcFactorial(citySize) * sizeof(int));
+  int numbBestPaths = 0;
+  struct path *bestPaths = (struct path *)malloc(calcFactorial(citySize) * sizeof(struct path));
+
+  for (int i = 0; i <= calcFactorial(citySize); i++)
+    bestPaths[i].path = (int *)malloc((citySize + 1) * sizeof(int));
 
   //this has to be les than (<) look more into it.
   //I have a feeling it has to be (<=)
@@ -247,18 +252,25 @@ void findOptimalPath(struct path * salesmanInfo) {
     }
   }
 
-  // for(int i = 0; i < calcFactorial(citySize); i++ ) {
-  //   if (optimalDist == salesmanInfo[i].totalDist) {
-  //     for (int j = 0; j <= citySize; j++) {
-  //       optimalPath[j] = salesmanInfo[i].path[j];
-  //     }
-  //     optimalPath[]
-  //     //maybe create a struct for all of this
-  //   }
-  // }
+  for(int i = 0; i < calcFactorial(citySize); i++ ) {
+    if (optimalDist == salesmanInfo[i].totalDist) {
+      for (int j = 0; j < citySize; j++) {
+        bestPaths[numbBestPaths].path[j] = salesmanInfo[i].path[j];
+      }
+      numbBestPaths++;
+    }
+  }
 
-  printf("Optimal Path: \n");
-  printf("Total Dist: %lf \n", optimalDist);
+  printf("\n Optimal Dist: %lf \n", optimalDist);
+  printf("Paths with Optimal Dist: %d \n", numbBestPaths);
+  for (int i = 0; i < numbBestPaths; i++) {
+    printf("\n ************** START %d ******************* \n", i);
+    for (int j = 0; j < citySize; j++) {
+      printf("%d -> ", bestPaths[i].path[j]);
+    }
+    printf("%d \n", bestPaths[i].path[0]);
+    printf(" ************** END %d ******************* \n \n", i);
+  }
 }
 
 void printFileContent(FILE *fptr) {
@@ -302,15 +314,15 @@ void printPathStruct(struct path *salesmanInfo) {
   int numbPaths = calcFactorial(citySize);
 
   for (int i = 0; i < numbPaths; i++) {
-    printf("************** START %d ******************* \n", i);
+    printf("\n ************** START %d ******************* \n", i);
     printf("path #: %d \n", salesmanInfo[i].pathNumb);
     printf("City Path: ");
     for (int j = 0; j < citySize; j++) {
       printf("%d -> ", salesmanInfo[i].path[j]);
     }
-    printf("%d \n", salesmanInfo[i].path[citySize]);
+    printf("%d \n", salesmanInfo[i].path[0]);
     printf("Dist Traveled: %lf \n", salesmanInfo[i].totalDist);
-    printf(" ************** END %d ******************* \n", i);
+    printf(" ************** END %d ******************* \n \n", i);
   }
 }
 
